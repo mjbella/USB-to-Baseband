@@ -17,11 +17,11 @@
 ## along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-OBJS += ring
+OBJS = ring.o
 BINARY = cdcacm
 
 OPENCM3_DIR = ../libopencm3
-LDSCRIPT = $(OPENCM3_DIR)/lib/stm32/f4/stm32f405x6.ld
+LDSCRIPT = ../stm32f4-discovery.ld
 
 include ../libopencm3.target.mk
 
