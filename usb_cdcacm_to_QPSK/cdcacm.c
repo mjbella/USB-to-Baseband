@@ -26,7 +26,7 @@
 #include <libopencm3/usb/cdc.h>
 #include <libopencm3/cm3/scb.h>
 #include <libopencm3/stm32/usb.h>
-
+#include <libopencm3/stm32/f4/nvic.h>
 
 #define BUFFER_SIZE 1024
 
@@ -209,9 +209,9 @@ static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
 
 	char buf[64];
 	int len = usbd_ep_read_packet(usbd_dev, 0x01, buf, 64);
-
+	
 	if (len) {
-		while (usbd_ep_write_packet(usbd_dev, 0x82, buf, len) == 0);
+		ring_safe_write(&input_ring, buf, len);
 	}
 }
 
@@ -235,7 +235,8 @@ usbd_device *usbd_dev;
 
 int main(void)
 {
-
+	u8 tx_buffer;
+	int ring_stat;
 	rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_120MHZ]);
 
 	rcc_periph_clock_enable(RCC_GPIOA);
@@ -247,7 +248,13 @@ int main(void)
 	gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE,
 			GPIO9 | GPIO11 | GPIO12);
 	gpio_set_af(GPIOA, GPIO_AF10, GPIO9 | GPIO11 | GPIO12);
-
+	
+	// LED Stuff!!!
+	gpio_mode_setup(GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO12);
+	gpio_toggle(GPIOD, GPIO12);
+	
+	nvic_enable_irq(NVIC_OTG_FS_IRQ);
+	
 	usbd_dev = usbd_init(&otgfs_usb_driver, &dev, &config,
 			usb_strings, 3,
 			usbd_control_buffer, sizeof(usbd_control_buffer));
@@ -255,8 +262,18 @@ int main(void)
 	usbd_register_set_config_callback(usbd_dev, cdcacm_set_config);
 	
 	while (1) {
-		usbd_poll(usbd_dev);
+		ring_stat = ring_read_ch(&input_ring, &tx_buffer);
+		if(ring_stat > 0)
+		{
+			usbd_ep_write_packet(usbd_dev, 0x82, &tx_buffer, 1);
+		}
+		__asm__("nop");
 	}
 
 }
 
+
+void otg_fs_isr(){
+	usbd_poll(usbd_dev);
+	gpio_toggle(GPIOD, GPIO12);
+}
