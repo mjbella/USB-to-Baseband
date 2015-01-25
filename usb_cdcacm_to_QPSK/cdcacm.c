@@ -27,6 +27,10 @@
 #include <libopencm3/cm3/scb.h>
 #include <libopencm3/stm32/usb.h>
 #include <libopencm3/stm32/f4/nvic.h>
+#include <libopencm3/stm32/pwr.h>
+#include <libopencmsis/core_cm3.h>
+
+
 
 #define BUFFER_SIZE 1024
 
@@ -231,12 +235,16 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 				cdcacm_control_request);
 }
 
+// Computer side packet parsing function
+// Read out of the ring buffer until we have a full packet!!!!
+//void parse_cmd_packet(struct ring *ring, 
+
 usbd_device *usbd_dev;
 
 int main(void)
 {
 	u8 tx_buffer;
-	int ring_stat;
+	int ring_stat, i, j;
 	rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_120MHZ]);
 
 	rcc_periph_clock_enable(RCC_GPIOA);
@@ -250,8 +258,8 @@ int main(void)
 	gpio_set_af(GPIOA, GPIO_AF10, GPIO9 | GPIO11 | GPIO12);
 	
 	// LED Stuff!!!
+	rcc_periph_clock_enable(RCC_GPIOD);
 	gpio_mode_setup(GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO12);
-	gpio_toggle(GPIOD, GPIO12);
 	
 	nvic_enable_irq(NVIC_OTG_FS_IRQ);
 	
@@ -262,18 +270,22 @@ int main(void)
 	usbd_register_set_config_callback(usbd_dev, cdcacm_set_config);
 	
 	while (1) {
+	    	__WFI();
+		gpio_toggle(GPIOD, GPIO12);
+		
 		ring_stat = ring_read_ch(&input_ring, &tx_buffer);
 		if(ring_stat > 0)
 		{
 			usbd_ep_write_packet(usbd_dev, 0x82, &tx_buffer, 1);
 		}
-		__asm__("nop");
 	}
 
 }
 
-
+/**************************
+ *	ISRs go here
+ *************************/
 void otg_fs_isr(){
 	usbd_poll(usbd_dev);
-	gpio_toggle(GPIOD, GPIO12);
+	//gpio_toggle(GPIOD, GPIO12);
 }
