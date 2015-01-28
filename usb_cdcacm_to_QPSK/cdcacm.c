@@ -37,6 +37,22 @@
 struct ring input_ring;
 uint8_t input_ring_buffer[BUFFER_SIZE];
 
+/*******************************************************
+ * My structs for the different types of data packets! *
+ ******************************************************/
+struct rfdata {
+	uint8_t carrier_sync[2];    // Period of constant phase (for clock recovery to sync)
+	uint8_t preamble[2];	    // Preamble for the IQ alignment
+	uint8_t type;		    // Packet type (control vs data vs who knows!)
+	uint8_t data[59];	    // Data!!!
+};
+
+union txdata {
+	struct rfdata;
+	uint8_t rawbytes[64];
+}
+
+// USB Stuff!!!!
 static const struct usb_device_descriptor dev = {
 	.bLength = USB_DT_DEVICE_SIZE,
 	.bDescriptorType = USB_DT_DEVICE,
@@ -235,9 +251,42 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 				cdcacm_control_request);
 }
 
+
 // Computer side packet parsing function
 // Read out of the ring buffer until we have a full packet!!!!
-//void parse_cmd_packet(struct ring *ring, 
+int parse_cmd_packet(struct ring *ring, struct rfdata *output){
+	// Find the header bytes of our packet first, then read out the remaining data
+	int32_t next, len, i; 
+	uint8_t buffer[128];
+	
+	// Read the buffer until we get to a packet start byte!
+	// OR stop when the buffer is empty!
+	do{
+		next = ring_read_ch(ring, 0);
+	}while(next != 0x3A);
+
+	// We didn't find a packet! Return witih an error.
+	if(next < 0) return -1;
+	
+	len = ring_read(ring, &buffer, 56);
+	if(len != -55){
+		// if we dont have a whole packet worth of data, then wait.
+		for(i=0; i < 1000; i++);
+		// Read the remaining data out
+		ring_read(ring, (&buffer+len, 56-len);
+	}
+	// We should have all the data now
+
+	// Setup the first part of the packet!
+	output->carrier_sync[0] = 0;
+	output->carrier_sync[1] = 0;
+	output->preamble[0]	= 0x0A;
+	output->preamble[1]	= 0x5F;
+
+	
+	
+	
+}
 
 usbd_device *usbd_dev;
 
@@ -246,6 +295,9 @@ int main(void)
 	u8 tx_buffer;
 	int ring_stat, i, j;
 	rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_120MHZ]);
+
+	// rfdata packet structure!
+	struct rfdata txdata;
 
 	rcc_periph_clock_enable(RCC_GPIOA);
 	rcc_periph_clock_enable(RCC_OTGFS);
