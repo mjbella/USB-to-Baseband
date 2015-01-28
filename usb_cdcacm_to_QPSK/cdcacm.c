@@ -282,11 +282,24 @@ int parse_cmd_packet(struct ring *ring, struct rfdata *output){
 	output->carrier_sync[1] = 0;
 	output->preamble[0]	= 0x0A;
 	output->preamble[1]	= 0x5F;
-
 	
+	// For now type is always 0
+	output->type = 0;
+	
+	// Fill our tx packet with the data!!
+	for(i=0; i < 56; i++){
+		output->data[i] = buffer[i];
+	}
 	
 	
 }
+
+// Take our rfdata struct and turn it into baseband dac samples!!
+void generate_baseband(struct rfdata *output){
+
+
+}
+
 
 usbd_device *usbd_dev;
 
