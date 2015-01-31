@@ -30,8 +30,6 @@
 #include <libopencm3/stm32/pwr.h>
 #include <libopencmsis/core_cm3.h>
 
-
-
 #define BUFFER_SIZE 1024
 
 struct ring input_ring;
@@ -50,7 +48,7 @@ struct rfdata {
 union txdata {
 	struct rfdata;
 	uint8_t rawbytes[64];
-}
+};
 
 // USB Stuff!!!!
 static const struct usb_device_descriptor dev = {
@@ -257,13 +255,28 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 int parse_cmd_packet(struct ring *ring, struct rfdata *output){
 	// Find the header bytes of our packet first, then read out the remaining data
 	int32_t next, len, i; 
+	int32_t state = 0;
+	int32_t retry = 0;
 	uint8_t buffer[128];
+
+	// I made this packet header up!! YAY ^_^
+	const char headder[4] = [0x3A, 0x21, 0x55, 0x53];
 	
 	// Read the buffer until we get to a packet start byte!
 	// OR stop when the buffer is empty!
 	do{
 		next = ring_read_ch(ring, 0);
-	}while(next != 0x3A);
+		if(next < 0){
+			retry++;
+			// If the buffer is empty, wait for it to get full again
+			for(i=0; i < 1000; i++);
+		}
+		else{
+		    // Find each byte of the packet header in order
+		    if(next == headder[state]) state++;
+		    else state = 0;
+		}
+	}while((state < 4)&&(retry < 5));
 
 	// We didn't find a packet! Return witih an error.
 	if(next < 0) return -1;
