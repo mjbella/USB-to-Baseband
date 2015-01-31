@@ -295,7 +295,7 @@ int parse_cmd_packet(struct ring *ring, struct rfdata *output){
 }
 
 // Take our rfdata struct and turn it into baseband dac samples!!
-void generate_baseband(struct rfdata *output){
+void generate_baseband(struct rfdata *output, uint16_t *Idata, uint16_t *Qdata){
 
 
 }
