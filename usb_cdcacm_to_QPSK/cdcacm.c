@@ -46,7 +46,7 @@ struct rfdata {
 };
 
 union txdata {
-	struct rfdata;
+	struct rfdata packet;
 	uint8_t rawbytes[64];
 };
 
@@ -260,7 +260,7 @@ int parse_cmd_packet(struct ring *ring, struct rfdata *output){
 	uint8_t buffer[128];
 
 	// I made this packet header up!! YAY ^_^
-	const char headder[4] = [0x3A, 0x21, 0x55, 0x53];
+	const char headder[4] = {0x3A, 0x21, 0x55, 0x53};
 	
 	// Read the buffer until we get to a packet start byte!
 	// OR stop when the buffer is empty!
@@ -276,17 +276,17 @@ int parse_cmd_packet(struct ring *ring, struct rfdata *output){
 		    if(next == headder[state]) state++;
 		    else state = 0;
 		}
-	}while((state < 4)&&(retry < 5));
+	}while( ( state < 4 ) && ( retry < 5 ) );
 
 	// We didn't find a packet! Return witih an error.
 	if(next < 0) return -1;
 	
-	len = ring_read(ring, &buffer, 56);
+	len = ring_read(ring, buffer, 56);
 	if(len != -55){
 		// if we dont have a whole packet worth of data, then wait.
 		for(i=0; i < 1000; i++);
 		// Read the remaining data out
-		ring_read(ring, (&buffer+len, 56-len);
+		ring_read(ring, buffer+len, 56-len);
 	}
 	// We should have all the data now
 
@@ -303,8 +303,8 @@ int parse_cmd_packet(struct ring *ring, struct rfdata *output){
 	for(i=0; i < 56; i++){
 		output->data[i] = buffer[i];
 	}
-	
-	
+
+	return 0;	
 }
 
 // Take our rfdata struct and turn it into baseband dac samples!!
