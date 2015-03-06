@@ -43,6 +43,6 @@ BMP_PORT	?=
 
 
 #include ../../../../Makefile.rules
-include ../libopencm3.rules.mk 
+include libopencm3.rules.mk 
 
 

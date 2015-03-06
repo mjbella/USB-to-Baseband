@@ -20,8 +20,8 @@
 OBJS = ring.o
 BINARY = cdcacm
 
-OPENCM3_DIR = ../libopencm3
-LDSCRIPT = ../stm32f4-discovery.ld
+OPENCM3_DIR = libopencm3
+LDSCRIPT = stm32f4-discovery.ld
 
-include ../libopencm3.target.mk
+include libopencm3.target.mk
 

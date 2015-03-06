@@ -17,9 +17,10 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <types.h>
+#include <ring.h>
+
 #include <stdlib.h>
-#include "lg/types.h"
-#include "lg/ring.h"
 #include <stdio.h>
 #include <errno.h>
 #include <libopencm3/stm32/rcc.h>
