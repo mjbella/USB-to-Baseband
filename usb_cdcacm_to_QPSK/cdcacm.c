@@ -20,6 +20,8 @@
 #include <stdlib.h>
 #include "lg/types.h"
 #include "lg/ring.h"
+#include <stdio.h>
+#include <errno.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/usb/usbd.h>
@@ -267,15 +269,21 @@ int parse_cmd_packet(struct ring *ring, struct rfdata *output){
 	do{
 		next = ring_read_ch(ring, 0);
 		if(next < 0){
-			retry++;
-			// If the buffer is empty, wait for it to get full again
-			for(i=0; i < 1000; i++);
+			// If the buffer is empty when we first call this function then return right away.
+			if(retry == 0) return -1;
+			else{
+				retry++;
+				// If the buffer is empty after we get one or more chars, wait for it to get full again.
+				for(i=0; i < 1000; i++);
+			}
 		}
 		else{
-		    // Find each byte of the packet header in order
-		    if(next == headder[state]) state++;
-		    else state = 0;
+			// Find each byte of the packet header in order
+			if(next == headder[state]) state++;
+			else state = 0;
 		}
+	// keep going while we are still looking for more of the headder chars, 
+	// and we have only re-checked 5 or fewer times.
 	}while( ( state < 4 ) && ( retry < 5 ) );
 
 	// We didn't find a packet! Return witih an error.
@@ -313,13 +321,32 @@ void generate_baseband(struct rfdata *output, uint16_t *Idata, uint16_t *Qdata){
 
 }
 
-
 usbd_device *usbd_dev;
+
+int _write(int file, char *ptr, int len)
+{
+	int i;
+	char cr = '\r';
+	for (i = 0; i < len; i++) {
+		if (ptr[i] == '\n') {
+			//usart_send_blocking(USART_CONSOLE, '\r');
+			usbd_ep_write_packet(usbd_dev, 0x82, &cr, 1);	
+		}
+		//usart_send_blocking(USART_CONSOLE, ptr[i]);
+		usbd_ep_write_packet(usbd_dev, 0x82, &ptr[i], 1);	
+	}
+	return i;
+	
+	errno = EIO;
+	return -1;
+}
+
+
 
 int main(void)
 {
 	u8 tx_buffer;
-	int ring_stat, i, j;
+	int ring_stat, rx_status, i, j;
 	rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_120MHZ]);
 
 	// rfdata packet structure!
@@ -347,15 +374,26 @@ int main(void)
 
 	usbd_register_set_config_callback(usbd_dev, cdcacm_set_config);
 	
+	//printf("This is a test string!!!?!?!?!??!");
+	
 	while (1) {
 	    	__WFI();
 		gpio_toggle(GPIOD, GPIO12);
 		
-		ring_stat = ring_read_ch(&input_ring, &tx_buffer);
-		if(ring_stat > 0)
-		{
-			usbd_ep_write_packet(usbd_dev, 0x82, &tx_buffer, 1);
+		rx_status = parse_cmd_packet(&input_ring, &txdata);
+		for(i=0; i<100000; i++);
+		printf("qwerty\n");
+		
+		if(rx_status > 0){
+		    printf("zomg asdf");	
+			
+			
 		}
+		//ring_stat = ring_read_ch(&input_ring, &tx_buffer);
+		//if(ring_stat > 0)
+		//{
+		//	usbd_ep_write_packet(usbd_dev, 0x82, &tx_buffer, 1);
+		//}
 	}
 
 }
