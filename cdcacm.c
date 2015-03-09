@@ -54,7 +54,7 @@ struct rfdata {
 
 union txdata {
 	struct rfdata packet;
-	uint8_t rawbytes[64];
+	uint8_t rawbytes[sizeof(struct rfdata)];
 };
 
 /*******************************************************
@@ -239,9 +239,10 @@ static int cdcacm_control_request(usbd_device *usbd_dev,
 static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
 {
 	(void)ep;
-
-	char buf[64];
-	int len = usbd_ep_read_packet(usbd_dev, 0x01, buf, 64);
+	int len;
+	u8 buf[64];
+	
+	len = usbd_ep_read_packet(usbd_dev, 0x01, buf, 64);
 	
 	if (len) {
 		ring_safe_write(&input_ring, buf, len);
@@ -368,14 +369,14 @@ int main(void)
 
 	rcc_periph_clock_enable(RCC_GPIOA);
 	rcc_periph_clock_enable(RCC_OTGFS);
-	
+
 	// Setup the ring buffer
 	ring_init(&input_ring, input_ring_buffer, BUFFER_SIZE);
-	
+
 	gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE,
 			GPIO9 | GPIO11 | GPIO12);
 	gpio_set_af(GPIOA, GPIO_AF10, GPIO9 | GPIO11 | GPIO12);
-	
+
 	// LED Stuff!!!
 	rcc_periph_clock_enable(RCC_GPIOD);
 	gpio_mode_setup(GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO12);
@@ -391,7 +392,7 @@ int main(void)
 	//printf("This is a test string!!!?!?!?!??!");
 	
 	while (1) {
-	    	__WFI();
+	   	__WFI();
 		gpio_toggle(GPIOD, GPIO12);
 		
 		rx_status = parse_cmd_packet(&input_ring, &txdata);
