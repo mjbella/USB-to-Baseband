@@ -32,7 +32,11 @@
 #include <libopencm3/stm32/pwr.h>
 #include <libopencmsis/core_cm3.h>
 
+// Ring Buffer Size
 #define BUFFER_SIZE 1024
+
+// IQ Data Buffer Length
+#define IQ_BUFFER   1024
 
 struct ring input_ring;
 uint8_t input_ring_buffer[BUFFER_SIZE];
@@ -52,12 +56,20 @@ union txdata {
 	uint8_t rawbytes[64];
 };
 
+/*******************************************************
+ *          My struct for the RF data format           *
+ ******************************************************/
+struct IQdata{
+	int16_t I[IQ_BUFFER];
+	int16_t Q[IQ_BUFFER];
+};
+
 // USB Stuff!!!!
 static const struct usb_device_descriptor dev = {
 	.bLength = USB_DT_DEVICE_SIZE,
 	.bDescriptorType = USB_DT_DEVICE,
 	.bcdUSB = 0x0200,
-	.bDeviceClass = USB_CLASS_CDC,
+    	.bDeviceClass = USB_CLASS_CDC,
 	.bDeviceSubClass = 0,
 	.bDeviceProtocol = 0,
 	.bMaxPacketSize0 = 64,
@@ -316,8 +328,9 @@ int parse_cmd_packet(struct ring *ring, struct rfdata *output){
 }
 
 // Take our rfdata struct and turn it into baseband dac samples!!
-void generate_baseband(struct rfdata *output, uint16_t *Idata, uint16_t *Qdata){
-
+void generate_baseband(struct rfdata *output, struct IQdata *BBdata){
+	
+	
 
 }
 
