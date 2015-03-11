@@ -340,11 +340,19 @@ void generate_baseband(union txdata *output, struct IQdata *BBdata){
 	for(i = 0; i < RFDATA_LEN; i++){
 		for(j = 0; j < 4; j++){
 			tmp = txdata->bytes[i];	// Get our packet data as bytes; grab the nth one
-			nbits = tmp & 0xD0;	// Grab only the top two bits
-			nbits >>= 6;		// Shift our two bits down to the low end of the byte
+			nbits = (tmp & 0xD0)>>6;// Grab only the top two bits and shift them down to the low end of the byte
 			tmp <<= 2;		// Move the next two bits into our the masked off area of our tmp variable
 			
-			
+			switch(nbits){
+			case 0:
+				// put a symbol in the IQ data buffer
+			case 1:
+				// put a symbol in the IQ data buffer
+			case 2:
+				// put a symbol in the IQ data buffer
+			case 3:
+				// put a symbol in the IQ data buffer
+			}
 		}
 	}
 }
