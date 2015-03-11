@@ -39,6 +39,9 @@
 // IQ Data Buffer Length
 #define IQ_BUFFER   1024
 
+// Packet data length in bytes
+#define RFDATA_LEN  64
+
 struct ring input_ring;
 uint8_t input_ring_buffer[BUFFER_SIZE];
 
@@ -48,13 +51,13 @@ uint8_t input_ring_buffer[BUFFER_SIZE];
 struct rfdata {
 	uint8_t carrier_sync[2];    // Period of constant phase (for clock recovery to sync)
 	uint8_t preamble[2];	    // Preamble for the IQ alignment
-	uint8_t type;		    // Packet type (control vs data vs who knows!)
+	uint8_t type;		    // Packet type (control vs data vs who knows)
 	uint8_t data[59];	    // Data!!!
 };
 
 union txdata {
 	struct rfdata packet;
-	uint8_t rawbytes[sizeof(struct rfdata)];
+	uint8_t bytes[RFDATA_LEN];  // Update the length of this if you change the above struct!
 };
 
 /*******************************************************
@@ -268,7 +271,7 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 
 // Computer side packet parsing function
 // Read out of the ring buffer until we have a full packet!!!!
-int parse_cmd_packet(struct ring *ring, struct rfdata *output){
+int parse_cmd_packet(struct ring *ring, union txdata *output){
 	// Find the header bytes of our packet first, then read out the remaining data
 	int32_t next, len, i; 
 	int32_t state = 0;
@@ -313,27 +316,37 @@ int parse_cmd_packet(struct ring *ring, struct rfdata *output){
 	// We should have all the data now
 
 	// Setup the first part of the packet!
-	output->carrier_sync[0] = 0;
-	output->carrier_sync[1] = 0;
-	output->preamble[0]	= 0x0A;
-	output->preamble[1]	= 0x5F;
+	output->packet->carrier_sync[0] = 0;
+	output->packet->carrier_sync[1] = 0;
+	output->packet->preamble[0]	= 0x0A;
+	output->packet->preamble[1]	= 0x5F;
 	
 	// For now type is always 0
-	output->type = 0;
+	output->packet->type = 0;
 	
 	// Fill our tx packet with the data!!
 	for(i=0; i < 56; i++){
-		output->data[i] = buffer[i];
+		output->packet->data[i] = buffer[i];
 	}
 
 	return 0;	
 }
 
 // Take our rfdata struct and turn it into baseband dac samples!!
-void generate_baseband(struct rfdata *output, struct IQdata *BBdata){
+void generate_baseband(union txdata *output, struct IQdata *BBdata){
+	uint16_t i, j; 
+    	uint8_t tmp, nbits;
 	
-	
-
+	for(i = 0; i < RFDATA_LEN; i++){
+		for(j = 0; j < 4; j++){
+			tmp = txdata->bytes[i];	// Get our packet data as bytes; grab the nth one
+			nbits = tmp & 0xD0;	// Grab only the top two bits
+			nbits >>= 6;		// Shift our two bits down to the low end of the byte
+			tmp <<= 2;		// Move the next two bits into our the masked off area of our tmp variable
+			
+			
+		}
+	}
 }
 
 usbd_device *usbd_dev;
