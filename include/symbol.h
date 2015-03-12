@@ -3,6 +3,7 @@
 
 #include <types.h>
 
+#define SQRT2 1.41421356237f
 /* TODO(mgyenik) find this a better home... */
 #define container_of(ptr, type, member) ({ \
 	const typeof( ((type *)0)->member ) *__mptr = (ptr); \
@@ -10,6 +11,7 @@
 
 /* This will blow up if the struct symbol_stream in your struct is not named stream */
 #define to_bpsk_stream(__ss) container_of(__ss, struct bpsk_stream, stream)
+#define to_qpsk_stream(__ss) container_of(__ss, struct qpsk_stream, stream)
 
 /*
  * Easy macro for iterating through all symbols in stream.
@@ -46,6 +48,14 @@ struct bpsk_stream {
 	u8 *data;
 };
 
-int bpsk_get_symbol(struct symbol_stream *ss, struct symbol *sym);
+struct qpsk_stream {
+	int len;
+	int bits;
+	int bit_idx;
+	struct symbol_stream stream;
+	u8 *data;
+};
+
 int init_bpsk_stream(struct bpsk_stream *bs, u8 *data, int n);
+int init_qpsk_stream(struct qpsk_stream *qs, u8 *data, int n);
 #endif /* __SYMBOL_H */
