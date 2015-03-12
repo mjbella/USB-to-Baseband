@@ -356,16 +356,10 @@ int add_one_symb(struct IQdata *data, int iamp, int qamp, int offset){
 
 // Take our rfdata struct and turn it into baseband dac samples!!
 void generate_baseband(union txdata *output, struct IQdata *BBdata){
-<<<<<<< HEAD
 	uint16_t i, j, k, iamp, qamp, offset;
     uint8_t tmp, nbits;
     
-=======
 	(void)BBdata;
-	uint16_t i, j; 
-	uint8_t tmp, nbits;
-	
->>>>>>> eaa640bfd2141d2ada89a64d9d8724ff4d557566
 	for(i = 0; i < RFDATA_LEN; i++){
 		for(j = 0; j < 4; j++){
 			tmp = output->bytes[i];	// Get our packet data as bytes; grab the nth one
@@ -383,22 +377,22 @@ void generate_baseband(union txdata *output, struct IQdata *BBdata){
 			case 0:
                 iamp = IAMP;
                 qamp = QAMP;
+				break;
 			case 1:
 				// put a symbol in the IQ data buffer
                 iamp = -IAMP;
                 qamp = QAMP;
+				break;
 			case 2:
 				// put a symbol in the IQ data buffer
                 iamp = IAMP;
                 qamp = -QAMP;
+				break;
 			case 3:
 				// put a symbol in the IQ data buffer
-<<<<<<< HEAD
                 iamp = -IAMP;
                 qamp = -QAMP;
-=======
 				break;
->>>>>>> eaa640bfd2141d2ada89a64d9d8724ff4d557566
 			}
         
             // put a symbol in the IQ data buffer
@@ -406,7 +400,7 @@ void generate_baseband(union txdata *output, struct IQdata *BBdata){
                     BBdata->I[offset+k] = iamp;
                     BBdata->Q[offset+k] = qamp;
             }
-            offset += 	
+            offset += k; /* XXX NO IDEA LOL FIXME */
         }
 	}
 }
