@@ -42,6 +42,13 @@
 // Packet data length in bytes
 #define RFDATA_LEN  64
 
+// Symbol Length (in dac samples)
+#define SYMB_LEN    50
+
+// I & Q Amplitudes
+#define IAMP        1000
+#define QAMP        1000
+
 struct ring input_ring;
 uint8_t input_ring_buffer[BUFFER_SIZE];
 
@@ -332,28 +339,60 @@ int parse_cmd_packet(struct ring *ring, union txdata *output){
 	return 0;	
 }
 
+/* No!
+int add_one_symb(struct IQdata *data, int iamp, int qamp, int offset){
+        uint16_t k;
+        for(k=0; k < SYMB_LEN; k++){
+                data->I[offset+k] = iamp;
+                data->Q[offset+k] = qamp;
+        }
+        return offset + SYMB_LEN;
+}
+*/
+
 // Take our rfdata struct and turn it into baseband dac samples!!
 void generate_baseband(union txdata *output, struct IQdata *BBdata){
-	uint16_t i, j; 
-    	uint8_t tmp, nbits;
-	
+	uint16_t i, j, k, iamp, qamp, offset;
+    uint8_t tmp, nbits;
+    
 	for(i = 0; i < RFDATA_LEN; i++){
 		for(j = 0; j < 4; j++){
 			tmp = txdata->bytes[i];	// Get our packet data as bytes; grab the nth one
 			nbits = (tmp & 0xD0)>>6;// Grab only the top two bits and shift them down to the low end of the byte
 			tmp <<= 2;		// Move the next two bits into our the masked off area of our tmp variable
 			
+            // Constellation made by this code!
+            // +Q
+            //  * 01    * 00
+            //
+            //
+            //  * 11    * 10
+            // -I&Q            +I
 			switch(nbits){
 			case 0:
-				// put a symbol in the IQ data buffer
+                iamp = IAMP;
+                qamp = QAMP;
 			case 1:
 				// put a symbol in the IQ data buffer
+                iamp = -IAMP;
+                qamp = QAMP;
 			case 2:
 				// put a symbol in the IQ data buffer
+                iamp = IAMP;
+                qamp = -QAMP;
 			case 3:
 				// put a symbol in the IQ data buffer
+                iamp = -IAMP;
+                qamp = -QAMP;
 			}
-		}
+        
+            // put a symbol in the IQ data buffer
+            for(k=0; k < SYMB_LEN; k++){
+                    BBdata->I[offset+k] = iamp;
+                    BBdata->Q[offset+k] = qamp;
+            }
+            offset += 	
+        }
 	}
 }
 
