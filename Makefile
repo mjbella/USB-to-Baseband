@@ -17,7 +17,7 @@
 ## along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-OBJS = ring.o
+OBJS = ring.o symbol.o
 BINARY = cdcacm
 
 OPENCM3_DIR = libopencm3

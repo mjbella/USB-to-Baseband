@@ -7,3 +7,4 @@
 *.swp
 *cscope*
 tags
+hosttest/streamtest
