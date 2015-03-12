@@ -212,6 +212,10 @@ static const char * usb_strings[] = {
 /* Buffer to be used for control requests. */
 uint8_t usbd_control_buffer[128];
 
+int parse_cmd_packet(struct ring *ring, union txdata *output);
+void generate_baseband(union txdata *output, struct IQdata *BBdata);
+int _write(int file, char *ptr, int len);
+
 static int cdcacm_control_request(usbd_device *usbd_dev,
 	struct usb_setup_data *req, uint8_t **buf, uint16_t *len,
 	void (**complete)(usbd_device *usbd_dev, struct usb_setup_data *req))
@@ -316,17 +320,17 @@ int parse_cmd_packet(struct ring *ring, union txdata *output){
 	// We should have all the data now
 
 	// Setup the first part of the packet!
-	output->packet->carrier_sync[0] = 0;
-	output->packet->carrier_sync[1] = 0;
-	output->packet->preamble[0]	= 0x0A;
-	output->packet->preamble[1]	= 0x5F;
+	output->packet.carrier_sync[0] = 0;
+	output->packet.carrier_sync[1] = 0;
+	output->packet.preamble[0]	= 0x0A;
+	output->packet.preamble[1]	= 0x5F;
 	
 	// For now type is always 0
-	output->packet->type = 0;
+	output->packet.type = 0;
 	
 	// Fill our tx packet with the data!!
 	for(i=0; i < 56; i++){
-		output->packet->data[i] = buffer[i];
+		output->packet.data[i] = buffer[i];
 	}
 
 	return 0;	
@@ -334,12 +338,13 @@ int parse_cmd_packet(struct ring *ring, union txdata *output){
 
 // Take our rfdata struct and turn it into baseband dac samples!!
 void generate_baseband(union txdata *output, struct IQdata *BBdata){
+	(void)BBdata;
 	uint16_t i, j; 
-    	uint8_t tmp, nbits;
+	uint8_t tmp, nbits;
 	
 	for(i = 0; i < RFDATA_LEN; i++){
 		for(j = 0; j < 4; j++){
-			tmp = txdata->bytes[i];	// Get our packet data as bytes; grab the nth one
+			tmp = output->bytes[i];	// Get our packet data as bytes; grab the nth one
 			nbits = (tmp & 0xD0)>>6;// Grab only the top two bits and shift them down to the low end of the byte
 			tmp <<= 2;		// Move the next two bits into our the masked off area of our tmp variable
 			
@@ -352,6 +357,7 @@ void generate_baseband(union txdata *output, struct IQdata *BBdata){
 				// put a symbol in the IQ data buffer
 			case 3:
 				// put a symbol in the IQ data buffer
+				break;
 			}
 		}
 	}
@@ -363,6 +369,9 @@ int _write(int file, char *ptr, int len)
 {
 	int i;
 	char cr = '\r';
+
+	(void)file;
+
 	for (i = 0; i < len; i++) {
 		if (ptr[i] == '\n') {
 			//usart_send_blocking(USART_CONSOLE, '\r');
@@ -382,11 +391,12 @@ int _write(int file, char *ptr, int len)
 int main(void)
 {
 	u8 tx_buffer;
-	int ring_stat, rx_status, i, j;
+	int rx_status, i;
 	rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_120MHZ]);
 
 	// rfdata packet structure!
 	struct rfdata txdata;
+	(void)txdata;
 
 	rcc_periph_clock_enable(RCC_GPIOA);
 	rcc_periph_clock_enable(RCC_OTGFS);
