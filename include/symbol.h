@@ -3,7 +3,8 @@
 
 #include <types.h>
 
-#define SQRT2 1.41421356237f
+#define SQRT2_INV 0.70710678118f
+
 /* TODO(mgyenik) find this a better home... */
 #define container_of(ptr, type, member) ({ \
 	const typeof( ((type *)0)->member ) *__mptr = (ptr); \

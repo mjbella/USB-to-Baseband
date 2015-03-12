@@ -59,20 +59,20 @@ int init_bpsk_stream(struct bpsk_stream *bs, u8 *data, int n)
 /* Below is QPSK, very similar... */
 struct symbol qpsk_lookup[] = {
 	{
-		.i = -SQRT2,
-		.q = -SQRT2,
+		.i = -SQRT2_INV,
+		.q = -SQRT2_INV,
 	},
 	{
-		.i = -SQRT2,
-		.q = SQRT2,
+		.i = -SQRT2_INV,
+		.q = SQRT2_INV,
 	},
 	{
-		.i = SQRT2,
-		.q = -SQRT2,
+		.i = SQRT2_INV,
+		.q = -SQRT2_INV,
 	},
 	{
-		.i = SQRT2,
-		.q = SQRT2,
+		.i = SQRT2_INV,
+		.q = SQRT2_INV,
 	},
 };
 
