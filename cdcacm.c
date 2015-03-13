@@ -80,7 +80,7 @@ static const struct usb_device_descriptor dev = {
 	.bLength = USB_DT_DEVICE_SIZE,
 	.bDescriptorType = USB_DT_DEVICE,
 	.bcdUSB = 0x0200,
-    	.bDeviceClass = USB_CLASS_CDC,
+    .bDeviceClass = USB_CLASS_CDC,
 	.bDeviceSubClass = 0,
 	.bDeviceProtocol = 0,
 	.bMaxPacketSize0 = 64,
@@ -345,12 +345,12 @@ int parse_cmd_packet(struct ring *ring, union txdata *output){
 
 /* No!
 int add_one_symb(struct IQdata *data, int iamp, int qamp, int offset){
-        uint16_t k;
-        for(k=0; k < SYMB_LEN; k++){
-                data->I[offset+k] = iamp;
-                data->Q[offset+k] = qamp;
-        }
-        return offset + SYMB_LEN;
+	uint16_t k;
+	for(k=0; k < SYMB_LEN; k++){
+		data->I[offset+k] = iamp;
+		data->Q[offset+k] = qamp;
+	}
+	return offset + SYMB_LEN;
 }
 */
 
@@ -366,42 +366,42 @@ void generate_baseband(union txdata *output, struct IQdata *BBdata){
 			nbits = (tmp & 0xD0)>>6;// Grab only the top two bits and shift them down to the low end of the byte
 			tmp <<= 2;		// Move the next two bits into our the masked off area of our tmp variable
 
-            // Constellation made by this code!
-            // +Q
-            //  * 01    * 00
-            //
-            //
-            //  * 11    * 10
-            // -I&Q            +I
+			// Constellation made by this code!
+			// +Q
+			//  * 01    * 00
+			//
+			//
+			//  * 11    * 10
+			// -I&Q            +I
 			switch(nbits){
 			case 0:
-                iamp = IAMP;
-                qamp = QAMP;
+				iamp = IAMP;
+				qamp = QAMP;
 				break;
 			case 1:
 				// put a symbol in the IQ data buffer
-                iamp = -IAMP;
-                qamp = QAMP;
+				iamp = -IAMP;
+				qamp = QAMP;
 				break;
 			case 2:
 				// put a symbol in the IQ data buffer
-                iamp = IAMP;
-                qamp = -QAMP;
+				iamp = IAMP;
+				qamp = -QAMP;
 				break;
 			case 3:
 				// put a symbol in the IQ data buffer
-                iamp = -IAMP;
-                qamp = -QAMP;
+				iamp = -IAMP;
+				qamp = -QAMP;
 				break;
 			}
 
-            // put a symbol in the IQ data buffer
-            for(k=0; k < SYMB_LEN; k++){
-                    BBdata->I[offset+k] = iamp;
-                    BBdata->Q[offset+k] = qamp;
-            }
-            offset += k; /* XXX NO IDEA LOL FIXME */
-        }
+			// put a symbol in the IQ data buffer
+			for(k=0; k < SYMB_LEN; k++){
+				BBdata->I[offset+k] = iamp;
+				BBdata->Q[offset+k] = qamp;
+			}
+			offset += k; /* XXX NO IDEA LOL FIXME */
+		}
 	}
 }
 
