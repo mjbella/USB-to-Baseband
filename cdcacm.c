@@ -255,9 +255,9 @@ static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
 	(void)ep;
 	int len;
 	u8 buf[64];
-	
+
 	len = usbd_ep_read_packet(usbd_dev, 0x01, buf, 64);
-	
+
 	if (len) {
 		ring_safe_write(&input_ring, buf, len);
 	}
@@ -284,14 +284,14 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 // Read out of the ring buffer until we have a full packet!!!!
 int parse_cmd_packet(struct ring *ring, union txdata *output){
 	// Find the header bytes of our packet first, then read out the remaining data
-	int32_t next, len, i; 
+	int32_t next, len, i;
 	int32_t state = 0;
 	int32_t retry = 0;
 	uint8_t buffer[128];
 
 	// I made this packet header up!! YAY ^_^
 	const char headder[4] = {0x3A, 0x21, 0x55, 0x53};
-	
+
 	// Read the buffer until we get to a packet start byte!
 	// OR stop when the buffer is empty!
 	do{
@@ -310,13 +310,13 @@ int parse_cmd_packet(struct ring *ring, union txdata *output){
 			if(next == headder[state]) state++;
 			else state = 0;
 		}
-	// keep going while we are still looking for more of the headder chars, 
+	// keep going while we are still looking for more of the headder chars,
 	// and we have only re-checked 5 or fewer times.
 	}while( ( state < 4 ) && ( retry < 5 ) );
 
 	// We didn't find a packet! Return witih an error.
 	if(next < 0) return -1;
-	
+
 	len = ring_read(ring, buffer, 56);
 	if(len != -55){
 		// if we dont have a whole packet worth of data, then wait.
@@ -331,16 +331,16 @@ int parse_cmd_packet(struct ring *ring, union txdata *output){
 	output->packet.carrier_sync[1] = 0;
 	output->packet.preamble[0]	= 0x0A;
 	output->packet.preamble[1]	= 0x5F;
-	
+
 	// For now type is always 0
 	output->packet.type = 0;
-	
+
 	// Fill our tx packet with the data!!
 	for(i=0; i < 56; i++){
 		output->packet.data[i] = buffer[i];
 	}
 
-	return 0;	
+	return 0;
 }
 
 /* No!
@@ -358,14 +358,14 @@ int add_one_symb(struct IQdata *data, int iamp, int qamp, int offset){
 void generate_baseband(union txdata *output, struct IQdata *BBdata){
 	uint16_t i, j, k, iamp, qamp, offset;
     uint8_t tmp, nbits;
-    
+
 	(void)BBdata;
 	for(i = 0; i < RFDATA_LEN; i++){
 		for(j = 0; j < 4; j++){
 			tmp = output->bytes[i];	// Get our packet data as bytes; grab the nth one
 			nbits = (tmp & 0xD0)>>6;// Grab only the top two bits and shift them down to the low end of the byte
 			tmp <<= 2;		// Move the next two bits into our the masked off area of our tmp variable
-			
+
             // Constellation made by this code!
             // +Q
             //  * 01    * 00
@@ -394,7 +394,7 @@ void generate_baseband(union txdata *output, struct IQdata *BBdata){
                 qamp = -QAMP;
 				break;
 			}
-        
+
             // put a symbol in the IQ data buffer
             for(k=0; k < SYMB_LEN; k++){
                     BBdata->I[offset+k] = iamp;
@@ -417,13 +417,13 @@ int _write(int file, char *ptr, int len)
 	for (i = 0; i < len; i++) {
 		if (ptr[i] == '\n') {
 			//usart_send_blocking(USART_CONSOLE, '\r');
-			usbd_ep_write_packet(usbd_dev, 0x82, &cr, 1);	
+			usbd_ep_write_packet(usbd_dev, 0x82, &cr, 1);
 		}
 		//usart_send_blocking(USART_CONSOLE, ptr[i]);
-		usbd_ep_write_packet(usbd_dev, 0x82, &ptr[i], 1);	
+		usbd_ep_write_packet(usbd_dev, 0x82, &ptr[i], 1);
 	}
 	return i;
-	
+
 	errno = EIO;
 	return -1;
 }
@@ -453,29 +453,29 @@ int main(void)
 	// LED Stuff!!!
 	rcc_periph_clock_enable(RCC_GPIOD);
 	gpio_mode_setup(GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO12);
-	
+
 	nvic_enable_irq(NVIC_OTG_FS_IRQ);
-	
+
 	usbd_dev = usbd_init(&otgfs_usb_driver, &dev, &config,
 			usb_strings, 3,
 			usbd_control_buffer, sizeof(usbd_control_buffer));
 
 	usbd_register_set_config_callback(usbd_dev, cdcacm_set_config);
-	
+
 	//printf("This is a test string!!!?!?!?!??!");
-	
+
 	while (1) {
 	   	__WFI();
 		gpio_toggle(GPIOD, GPIO12);
-		
+
 		rx_status = parse_cmd_packet(&input_ring, &txdata);
 		for(i=0; i<100000; i++);
 		printf("qwerty\n");
-		
+
 		if(rx_status > 0){
-		    printf("zomg asdf");	
-			
-			
+		    printf("zomg asdf");
+
+
 		}
 		//ring_stat = ring_read_ch(&input_ring, &tx_buffer);
 		//if(ring_stat > 0)
