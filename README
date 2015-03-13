@@ -9,3 +9,19 @@ Board connections:
 ------------------
 
   CN5	(USB_OTG_FS)	USB acting as device, connect to computer
+
+Building:
+---------
+
+Make sure you have cloned the libopencm3 submodule.  The easiest way to
+do this is with a recursive clone when cloning this repo.
+
+    git clone --recursive
+
+Build the libopencm3 binaries before building the main project.
+
+    cd libopencm3 && make
+
+Then build the project
+
+    make
