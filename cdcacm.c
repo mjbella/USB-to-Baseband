@@ -432,7 +432,7 @@ int _write(int file, char *ptr, int len)
 
 int main(void)
 {
-	u8 tx_buffer;
+	//u8 tx_buffer;
 	int rx_status, i;
 	rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_120MHZ]);
 
