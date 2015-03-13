@@ -356,7 +356,7 @@ int add_one_symb(struct IQdata *data, int iamp, int qamp, int offset){
 
 // Take our rfdata struct and turn it into baseband dac samples!!
 void generate_baseband(union txdata *output, struct IQdata *BBdata){
-	uint16_t i, j, k, iamp, qamp, offset;
+	uint16_t i, j, k, iamp, qamp, offset = 0;
     uint8_t tmp, nbits;
 
 	(void)BBdata;
@@ -393,6 +393,9 @@ void generate_baseband(union txdata *output, struct IQdata *BBdata){
 				iamp = -IAMP;
 				qamp = -QAMP;
 				break;
+			default:
+				/* Not possible, as only two bits are used for nbits. */
+				return;
 			}
 
 			// put a symbol in the IQ data buffer
