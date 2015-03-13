@@ -436,9 +436,7 @@ int main(void)
 	int rx_status, i;
 	rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_120MHZ]);
 
-	// rfdata packet structure!
-	struct rfdata txdata;
-	(void)txdata;
+	union txdata txdata;
 
 	rcc_periph_clock_enable(RCC_GPIOA);
 	rcc_periph_clock_enable(RCC_OTGFS);
