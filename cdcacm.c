@@ -460,8 +460,6 @@ int main(void)
 
 	usbd_register_set_config_callback(usbd_dev, cdcacm_set_config);
 
-	//printf("This is a test string!!!?!?!?!??!");
-
 	while (1) {
 	   	__WFI();
 		gpio_toggle(GPIOD, GPIO12);
