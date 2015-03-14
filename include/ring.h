@@ -19,6 +19,8 @@
 #ifndef RING_H
 #define RING_H
 
+#include "types.h"
+
 typedef s32 ring_size_t;
 
 struct ring {

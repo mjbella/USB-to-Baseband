@@ -17,8 +17,8 @@
 ## along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-OBJS = ring.o symbol.o
-BINARY = cdcacm
+OBJS = cdcacm.o ring.o symbol.o
+BINARY = main
 
 OPENCM3_DIR = libopencm3
 LDSCRIPT = stm32f4-discovery.ld
