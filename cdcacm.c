@@ -410,28 +410,23 @@ void generate_baseband(union txdata *output, struct IQdata *BBdata){
 
 usbd_device *usbd_dev;
 
-int _write(int file, char *ptr, int len)
+int _write(int __attribute__((unused)) file, char *ptr, int len)
 {
-	int i;
-	char cr = '\r';
+	int ret;
+	int i = 0;
 
-	(void)file;
-
-	for (i = 0; i < len; i++) {
-		if (ptr[i] == '\n') {
-			//usart_send_blocking(USART_CONSOLE, '\r');
-			usbd_ep_write_packet(usbd_dev, 0x82, &cr, 1);
+	do {
+		ret = usbd_ep_write_packet(usbd_dev, 0x82, ptr+i, len-i);
+		if (ret < 0) {
+			errno = EIO;
+			return -1;
 		}
-		//usart_send_blocking(USART_CONSOLE, ptr[i]);
-		usbd_ep_write_packet(usbd_dev, 0x82, &ptr[i], 1);
-	}
-	return i;
 
-	errno = EIO;
-	return -1;
+		i += 0;
+	} while (i < len);
+
+	return len;
 }
-
-
 
 int main(void)
 {
@@ -469,7 +464,7 @@ int main(void)
 
 		rx_status = parse_cmd_packet(&input_ring, &txdata);
 		for(i=0; i<100000; i++);
-		printf("qwerty\n");
+		printf("qwerty\r\n");
 
 		if(rx_status > 0){
 		    printf("zomg asdf");
