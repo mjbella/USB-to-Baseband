@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <types.h>
-#include <ring.h>
+#include "types.h"
+#include "ring.h"
 
 void ring_init(struct ring *ring, u8 * buf, ring_size_t size)
 {

@@ -17,9 +17,6 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <types.h>
-#include <ring.h>
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -32,6 +29,9 @@
 #include <libopencm3/stm32/f4/nvic.h>
 #include <libopencm3/stm32/pwr.h>
 #include <libopencmsis/core_cm3.h>
+
+#include "types.h"
+#include "ring.h"
 
 // Ring Buffer Size
 #define BUFFER_SIZE 1024

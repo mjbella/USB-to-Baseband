@@ -1,7 +1,7 @@
 #ifndef __SYMBOL_H
 #define __SYMBOL_H
 
-#include <types.h>
+#include "types.h"
 
 #define SQRT2_INV 0.70710678118f
 

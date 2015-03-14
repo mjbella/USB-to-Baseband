@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include <types.h>
-#include <symbol.h>
+#include "types.h"
+#include "symbol.h"
 
 u8 dat[] = {0xaa, 0xff, 0x00, 0x55, 0x33};
 
