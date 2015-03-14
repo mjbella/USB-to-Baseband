@@ -1,8 +1,9 @@
 /*
  * This file contains implementations for some basic symbol streams,
  */
-#include <symbol.h>
 #include <stdint.h>
+
+#include "symbol.h"
 
 struct symbol bpsk_lookup[] = {
 	{
