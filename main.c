@@ -7,6 +7,7 @@
 #include "cdcacm.h"
 #include "ring.h"
 #include "types.h"
+#include "iq.h"
 
 // Ring Buffer Size
 #define BUFFER_SIZE 1024
@@ -40,14 +41,6 @@ struct rfdata {
 union txdata {
 	struct rfdata packet;
 	uint8_t bytes[RFDATA_LEN];  // Update the length of this if you change the above struct!
-};
-
-/*******************************************************
- *          My struct for the RF data format           *
- ******************************************************/
-struct IQdata{
-	int16_t I[IQ_BUFFER];
-	int16_t Q[IQ_BUFFER];
 };
 
 // Computer side packet parsing function
