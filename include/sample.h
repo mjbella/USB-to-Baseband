@@ -31,5 +31,6 @@ float convolve_point(float *in, float *fir, int in_len, int out_idx, int fir_len
 int fill_iq_bufs(struct symbol_stream *ss, float *i, float *q, int n);
 void convolve(float *in, float *out, float *fir, int in_len, int out_len, int fir_len);
 int init_filter_stream(struct filter_stream *fs, struct symbol_stream *ss, float *coeffs, int filter_len);
+int init_sample_hold(struct sample_hold *sh, struct symbol_stream *ss, int hold_count);
 
 #endif /* __SAMPLE_H */

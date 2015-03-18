@@ -13,10 +13,10 @@ struct iq {
 	float q;
 };
 
-/* struct for the RF data format */
+/* struct for the normalized baseband data */
 struct IQdata {
-	int16_t I[IQ_BUFFER];
-	int16_t Q[IQ_BUFFER];
+	float I[IQ_BUFFER];
+	float Q[IQ_BUFFER];
 };
 
 #endif /* __IQ_H */

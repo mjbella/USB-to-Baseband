@@ -108,56 +108,8 @@ static int parse_cmd_packet(struct ring *ring, union txdata *output){
 
 // Take our rfdata struct and turn it into baseband dac samples!!
 static void generate_baseband(union txdata *output, struct IQdata *BBdata){
-	uint16_t i, j, k, iamp, qamp, offset = 0;
-    uint8_t tmp, nbits;
-
+	(void)output;
 	(void)BBdata;
-	for(i = 0; i < RFDATA_LEN; i++){
-		for(j = 0; j < 4; j++){
-			tmp = output->bytes[i];	// Get our packet data as bytes; grab the nth one
-			nbits = (tmp & 0xD0)>>6;// Grab only the top two bits and shift them down to the low end of the byte
-			tmp <<= 2;		// Move the next two bits into our the masked off area of our tmp variable
-
-			// Constellation made by this code!
-			// +Q
-			//  * 01    * 00
-			//
-			//
-			//  * 11    * 10
-			// -I&Q            +I
-			switch(nbits){
-			case 0:
-				iamp = IAMP;
-				qamp = QAMP;
-				break;
-			case 1:
-				// put a symbol in the IQ data buffer
-				iamp = -IAMP;
-				qamp = QAMP;
-				break;
-			case 2:
-				// put a symbol in the IQ data buffer
-				iamp = IAMP;
-				qamp = -QAMP;
-				break;
-			case 3:
-				// put a symbol in the IQ data buffer
-				iamp = -IAMP;
-				qamp = -QAMP;
-				break;
-			default:
-				/* Not possible, as only two bits are used for nbits. */
-				return;
-			}
-
-			// put a symbol in the IQ data buffer
-			for(k=0; k < SYMB_LEN; k++){
-				BBdata->I[offset+k] = iamp;
-				BBdata->Q[offset+k] = qamp;
-			}
-			offset += k; /* XXX NO IDEA LOL FIXME */
-		}
-	}
 }
 
 int main(void)

@@ -1,5 +1,6 @@
 #include "symbol.h"
 #include "sample.h"
+#include <stdio.h>
 
 /*
  * Computes contributions of each input point to the output.
@@ -12,6 +13,7 @@ float convolve_point(float *in, float *fir, int in_len, int out_idx, int fir_len
 
 	out = 0.0f;
 	for (j = 0; j < fir_len; j++) {
+		//printf("convolve\n");
 		int input_idx;
 
 		input_idx = out_idx - j;
@@ -89,8 +91,8 @@ static int filter_emit_samples(struct sample_stream *ss, struct IQdata *bb_data)
 
 	/* Apply pulse shaping filter to both in-phase and quadrature-phase components */
 	for (j = 0; j < len; j++) {
-		bb_data->I[j] = 4096*convolve_point(i, fs->filter_coeff, len, j, fs->filter_len);
-		bb_data->Q[j] = 4096*convolve_point(q, fs->filter_coeff, len, j, fs->filter_len);
+		bb_data->I[j] = convolve_point(i, fs->filter_coeff, len, j, fs->filter_len);
+		bb_data->Q[j] = convolve_point(q, fs->filter_coeff, len, j, fs->filter_len);
 	}
 
 	return 0;

@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "symbol.h"
+#include "sample.h"
 
 struct iq bpsk_constellation[] = {
 	{
@@ -139,11 +140,9 @@ int init_qpsk_stream(struct qpsk_stream *qs, u8 *data, int n)
 static int sample_hold_len(struct symbol_stream *ss)
 {
 	int orig_len;
-	struct symbol_stream *oss;
 	struct sample_hold *sh;
 
 	sh = to_sample_hold(ss);
-	oss = sh->orig_stream;
 	orig_len = sh->orig_stream->len(sh->orig_stream);
 	return sh->hold*orig_len - sh->count;
 }
@@ -175,4 +174,5 @@ int init_sample_hold(struct sample_hold *sh, struct symbol_stream *ss, int hold_
 
 	sh->stream.get_symbol = get_sample_hold;
 	sh->stream.len = sample_hold_len;
+	return 0;
 }
