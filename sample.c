@@ -1,6 +1,5 @@
 #include "symbol.h"
 #include "sample.h"
-#include <stdio.h>
 
 /*
  * Computes contributions of each input point to the output.
@@ -13,7 +12,6 @@ float convolve_point(float *in, float *fir, int in_len, int out_idx, int fir_len
 
 	out = 0.0f;
 	for (j = 0; j < fir_len; j++) {
-		//printf("convolve\n");
 		int input_idx;
 
 		input_idx = out_idx - j;
