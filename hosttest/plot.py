@@ -19,23 +19,22 @@ taps = list(taps_type.in_dll(l, "taps"))
 
 # Use SciPy's frequency analysis for digital filters
 w, h = signal.freqz(taps)
+h_dB = 20 * np.log10(abs(h))  # Magnitude Response
+h_Phase = np.unwrap(np.angle(h))  # Phase Response
 
 # Make our plot figure
 fig = plt.figure()
 plt.title('FIR filter frequency response')
 ax1 = fig.add_subplot(111)
 
-# Plot our signals; w = angle (rad)
-# h = complex gain, so we take the magnitude of it (abs) and log-scale it to dB
-plt.plot(w, 20 * np.log10(abs(h)), 'b')
-# Label our axes
+# Plot Magnitude Response
+plt.plot(w, h_dB, 'b')
 plt.ylabel('Amplitude [dB]', color='b')
 plt.xlabel('Frequency [rad/sample]')
 
-# graphy graphy graph graph
+# Plot Phase Response
 ax2 = ax1.twinx()
-angles = np.unwrap(np.angle(h))
-plt.plot(w, angles, 'g')
+plt.plot(w, h_Phase, 'g')
 plt.ylabel('Angle (radians)', color='g')
 plt.grid()
 plt.axis('tight')
@@ -43,5 +42,5 @@ plt.axis('tight')
 # Save plot to file
 plt.savefig("pyplot.png")
 
-# this makes a popup of the figure, comment this out to disable it
+# Show the figure in a window, comment this out to disable it
 plt.show()
