@@ -1,4 +1,5 @@
 *.o
+*.pico
 *.elf
 *.hex
 *.bin
