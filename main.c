@@ -29,7 +29,7 @@
 struct ring input_ring;
 uint8_t input_ring_buffer[BUFFER_SIZE];
 
-extern uint8_t waveform[256];
+extern uint16_t waveform[256];
 
 /*******************************************************
  * My structs for the different types of data packets! *
@@ -132,8 +132,12 @@ static void gpio_setup(void)
 	/* Set the digital test output on PC1 */
 	gpio_mode_setup(GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO1);
 	gpio_set_output_options(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, GPIO1);
+
 	/* Set PA4 for DAC channel 1 to analogue, ignoring drive mode. */
 	gpio_mode_setup(GPIOA, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO4);
+
+	/* Set PA5 for DAC channel 1 to analogue, ignoring drive mode. */
+	gpio_mode_setup(GPIOA, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO5);
 
 }
 
@@ -150,16 +154,16 @@ int main(void)
 	/* DAC test data */
 	uint16_t j, x;
 	for (j = 0; j < 256; j++) {
-		if (j < 10) {
-			x = 10;
+		if (j < 20) {
+			x = 4095;
 		} else if (j < 121) {
-			x = 10 + ((j*j) >> 7);
+			x = 100 + ((j*j) >> 5);
 		} else if (j < 170) {
-			x = j/2;
+			x = 10*j/2;
 		} else if (j < 246) {
-			x = j + (80 - j/2);
+			x = 10*(j + (80 - j/2));
 		} else {
-			x = 10;
+			x = 100;
 		}
 		waveform[j] = x;
 	}
