@@ -3,6 +3,10 @@ all: streamtest
 TARGET = ..
 CFLAGS = -O3 -g3 -I../include/
 
+CONVOLUTION_CFLAGS := $(CFLAGS) -lm
+
+LIBOBJS := $(TARGET)/convolution.o $(TARGET)/symbol.o $(TARGET)/sample.o
+
 %.o: %.c
 	gcc -c $(CFLAGS) -o $@ $^
 
@@ -10,11 +14,14 @@ CFLAGS = -O3 -g3 -I../include/
 %.pico: %.c
 	gcc -c $(CFLAGS) -fpic -o $@ $^
 
-streamtest: streamtest.o $(TARGET)/symbol.o $(TARGET)/sample.o
+streamtest: streamtest.o $(LIBOBJS)
 	gcc $(CFLAGS) -o $@ $^
 
-streamtest.so: streamtest.pico $(TARGET)/symbol.pico $(TARGET)/sample.pico
+streamtest.so: streamtest.pico $(LIBOBJS:.o=.pico)
 	gcc -shared -o $@ $^
+
+convolutiontest: convolutiontest.o $(LIBOBJS)
+	gcc $(CONVOLUTION_CFLAGS) -o $@ $^
 
 plotpng: plotdata
 	./pngplot.sh filter_test.png raw filtered
@@ -31,3 +38,4 @@ clean:
 	- rm -rf filtered
 	- rm streamtest
 	- rm streamtest.so
+	- rm convolutiontest
