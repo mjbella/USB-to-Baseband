@@ -16,7 +16,7 @@ float convolve_point(float *in, float *fir, int in_len, int out_idx, int fir_len
 		input_idx = out_idx - j;
 		if (input_idx < 0)
 			continue;
-		if (input_idx > in_len)
+		if (input_idx >= in_len)
 			continue;
 
 		out += fir[j]*in[input_idx];
